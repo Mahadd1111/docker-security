@@ -1,118 +1,112 @@
 "use client"
 import axios from "axios"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
-const ImageSec = ()=>{
-    const [loading,setLoading]=useState("")
-    const [manifest,setManifest]=useState({})
+const ImageSec = () => {
+    const [loading, setLoading] = useState("")
+    const [manifest, setManifest] = useState({})
+    const [vulnerabilities, setVulnerabilities] = useState([])
+    const [image, setImage] = useState("")
 
-    async function getManifestDigest(imageName, imageTag) {
-        
-    }
+    useEffect(() => {
+        console.log(vulnerabilities)
+    }, [vulnerabilities]);
 
-    async function checkImageSec(){
+
+    async function checkImageSec() {
         const imageData = {
-            imageName:'alpine',
-            imageTag:'latest'
+            imageName: image,
+            ipAddress: '192.168.190.128',
+            reportPath: 'scan-report.json'
         }
-        try{
-            setLoading("Loading Manifest...")
-            const data = await axios.post('http://localhost:4000/manifest-digest',imageData)
-            setLoading("")
-            console.log("Returned Data: ",data)
-        }catch(error){
-            console.log("Returned Error: ",error)
+        try {
+            setLoading("Scanning Vulnerabilities...")
+            const data = await axios.post('http://localhost:4000/secure-image', imageData)
+            setLoading("Scan Complete")
+            console.log("Returned Data: ", data)
+            try {
+                const fileData = await axios.get(`http://localhost:4000/read-file`);
+                console.log("File Data:", fileData);
+                setVulnerabilities(fileData.data.vulnerabilities)
+            } catch (error) {
+                console.log(error)
+            }
+        } catch (error) {
+            console.log("Returned Error: ", error)
+            if (error.response) {
+                console.error("Server Error Data:", error.response.data);
+                console.error("Server Error Status:", error.response.status);
+                console.error("Server Error Headers:", error.response.headers);
+                const errorMessage = "Cannot Scan The Image";
+                alert(`Error: ${errorMessage}`);
+                setLoading("")
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+                alert("No response received from the server");
+                setLoading("")
+            } else {
+                console.error("Request setup error:", error.message);
+                alert("Error setting up the request");
+                setLoading("")
+            }
         }
-        setManifest(
-            {
-                "schemaVersion": 2,
-                "mediaType": "application/vnd.docker.distribution.manifest.list.v2+json",
-                "manifests": [
-                   {
-                      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-                      "size": 528,
-                      "digest": "sha256:d695c3de6fcd8cfe3a6222b0358425d40adfd129a8a47c3416faff1a8aece389",
-                      "platform": {
-                         "architecture": "amd64",
-                         "os": "linux"
-                      }
-                   },
-                   {
-                      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-                      "size": 528,
-                      "digest": "sha256:1832ef473ede9a923cc6affdf13b54a1be6561ad2ce3c3684910260a7582d36b",
-                      "platform": {
-                         "architecture": "arm",
-                         "os": "linux",
-                         "variant": "v6"
-                      }
-                   },
-                   {
-                      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-                      "size": 528,
-                      "digest": "sha256:211fe64069acea47ea680c0943b5a77be1819d0e85365011595391f7562caf27",
-                      "platform": {
-                         "architecture": "arm",
-                         "os": "linux",
-                         "variant": "v7"
-                      }
-                   },
-                   {
-                      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-                      "size": 528,
-                      "digest": "sha256:d4ade3639c27579321046d78cc44ec978cea8357d56932611984f601d27e30ac",
-                      "platform": {
-                         "architecture": "arm64",
-                         "os": "linux",
-                         "variant": "v8"
-                      }
-                   },
-                   {
-                      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-                      "size": 528,
-                      "digest": "sha256:5ece42cd6ca30ec1a4cc5e1e10a260ad4906e1d4588ae0ef486874d72b3857ad",
-                      "platform": {
-                         "architecture": "386",
-                         "os": "linux"
-                      }
-                   },
-                   {
-                      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-                      "size": 528,
-                      "digest": "sha256:1698bcd6bf339e1578dfb9f0034dff615e3eec8404517045046ecbeb84ad01d6",
-                      "platform": {
-                         "architecture": "ppc64le",
-                         "os": "linux"
-                      }
-                   },
-                   {
-                      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-                      "size": 528,
-                      "digest": "sha256:5c63479aeed37522de78284d99dcd32f9ad288b04a56236f44e78b3b3f62ebd2",
-                      "platform": {
-                         "architecture": "s390x",
-                         "os": "linux"
-                      }
-                   }
-                ]
-             }
-             
-        );
-        try{
-            setLoading("Loading Indexer...")
-            const data2 = await axios.post('http://localhost:4000/secure-image',{data:manifest})
-            setLoading("")
-            console.log("Returned Data (Indexer): ",data2)
-        }catch(error){
-            console.log("Returned Error: ",error)
-        }
-        
+
     }
 
-    return(
-        <div className="p-10 flex min-h-screen flex-col bg-slate-800">
-            <button onClick={checkImageSec} className="bg-white px-4 py-2 text-slate-800 text-xl font-bold">Click Me</button>
-            <p className="text-white font-bold text-2xl">{loading}</p>
+    return (
+        <div className="p-10 flex min-h-screen flex-col  bg-slate-800">
+            <div className="flex flex-row justify-start items-end gap-10">
+                <div className="flex flex-col gap-2 text-white justify-center">
+                    <label>Enter Image Name</label>
+                    <input type="text" onChange={(e) => { setImage(e.target.value); console.log(image) }} value={image} placeholder="Eg. Alpine:latest" className="text-black w-80 rounded-lg py-2 px-4"></input>
+                </div>
+                <button onClick={checkImageSec} className="bg-white rounded-lg px-4 py-2 h-10 text-slate-800 text-xl font-bold">Click Me</button>
+            </div>
+            <p className="text-white font-bold text-2xl my-10">{loading}</p>
+            <div className="flex flex-col gap-10">
+                <p className="text-white font-bold text-2xl">Vulnerabilities</p>
+                <div className="max-h-[600px] overflow-y-auto">
+                    <table className="">
+                        <thead className="py-5">
+                            <tr className="bg-gray-600 text-white font-bold py-5 px-6">
+                                <td className="px-4 py-2">Feature Name</td>
+                                <td className="px-4 py-2">Feature Version</td>
+                                <td className="px-4 py-2">Vulnerability</td>
+                                <td className="px-4 py-2">Namespace</td>
+                                <td className="px-4 py-2">Description</td>
+                                <td className="px-4 py-2">Link</td>
+                                <td className="px-4 py-2">Severity</td>
+                                <td className="px-4 py-2">Fixed By</td>
+                            </tr>
+                        </thead>
+                        <tbody >
+                            {vulnerabilities.length > 0 ? (
+                                vulnerabilities.map((item, index) => (
+                                    <tr key={index} className={`text-black text-center text-wrap text-sm py-3 px-6 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}`}>
+                                        <td className="px-2">{item.featurename}</td>
+                                        <td className="px-2">{item.featureversion}</td>
+                                        <td className="px-2" >{item.vulnerability}</td>
+                                        <td className="px-2">{item.namespace}</td>
+                                        <td className="px-2">{item.description}</td>
+                                        <td className="px-2">{item.link}</td>
+                                        <td className="px-2">{item.severity}</td>
+                                        <td className="px-2">{item.fixedby}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="8" className="text-center px-4 py-2 mt-10 text-red-500">
+                                        No data available
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+
         </div>
     )
 }
