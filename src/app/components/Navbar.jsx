@@ -7,8 +7,8 @@ const Navbar = ()=>{
             <p>Docker Security</p>
             <div className="flex flex-row gap-5">
                 <Link href="/">Home</Link>
-                <Link href="/Image">Image</Link>
-                <Link href="#">Container</Link>
+                <Link href="/Clair">Clair</Link>
+                <Link href="/Trivy">Trivy</Link>
             </div>
         </div>
     )

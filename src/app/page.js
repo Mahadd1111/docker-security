@@ -13,8 +13,8 @@ export default function Home() {
         </div>
       </section>
       <section className='p-10 grid grid-cols-2 gap-40'>
-        <Link href="/Image" className='bg-white py-6 px-8 text-slate-800 font-bold text-xl hover:bg-gray-500 flex items-center justify-center rounded-2xl'>Secure Docker Image</Link>
-        <Link href="#" className='bg-white py-6 px-8 text-slate-800 font-bold text-xl hover:bg-gray-500 flex items-center justify-center rounded-2xl'>Secure Docker Container</Link>
+        <Link href="/Clair" className='bg-white py-6 px-8 text-slate-800 font-bold text-xl hover:bg-gray-500 flex items-center justify-center rounded-2xl'>Secure Image With Clair</Link>
+        <Link href="/Trivy" className='bg-white py-6 px-8 text-slate-800 font-bold text-xl hover:bg-gray-500 flex items-center justify-center rounded-2xl'>Secure Image With Trivy</Link>
       </section>
     </main>
   )
